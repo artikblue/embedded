@@ -1,0 +1,181 @@
+const int LED1 = 6;           // groen
+const int LED2 = 3;           // blauw
+const int LED3 = 5;           // rood
+
+const int RELAY1 = 8;
+const int RELAY2 = 7;
+const int RELAY3 = 4;
+const int RELAY4 = 2;
+
+const int BUTTON1 = A0;
+const int BUTTON2 = A1;
+const int BUTTON3 = A2;
+const int BUTTON4 = A3;
+const int BUTTON5 = A4;       //reset
+
+boolean lastButton1 = LOW;
+boolean currentButton1 = LOW;
+boolean relayOn1 = true;
+boolean lastButton2 = LOW;
+boolean currentButton2 = LOW;
+boolean relayOn2 = true;
+boolean lastButton3 = LOW;
+boolean currentButton3 = LOW;
+boolean relayOn3 = true;
+boolean lastButton4 = LOW;
+boolean currentButton4 = LOW;
+boolean relayOn4 = true;
+boolean lastButton5 = LOW;
+boolean currentButton5 = LOW;
+
+unsigned long previousMillis = 0;
+const long interval = 30000;
+int intervalReset = interval * 0.75;
+
+void setup(){
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
+  
+  pinMode(RELAY1, OUTPUT);
+  pinMode(BUTTON1, INPUT);
+  pinMode(RELAY2, OUTPUT);
+  pinMode(BUTTON2, INPUT);
+  pinMode(RELAY3, OUTPUT);
+  pinMode(BUTTON3, INPUT);
+  pinMode(RELAY4, OUTPUT);
+  pinMode(BUTTON4, INPUT);
+  pinMode(BUTTON5, INPUT);
+}
+
+boolean debounce1(boolean last1) {
+  boolean current1 = digitalRead(BUTTON1);
+  if(last1 != current1) {
+    delay(5);
+    current1 = digitalRead(BUTTON1);
+  }
+  return current1;
+}
+boolean debounce2(boolean last2) {
+  boolean current2 = digitalRead(BUTTON2);
+  if(last2 != current2) {
+    delay(5);
+    current2 = digitalRead(BUTTON2);
+  }
+  return current2;
+}
+boolean debounce3(boolean last3) {
+  boolean current3 = digitalRead(BUTTON3);
+  if(last3 != current3) {
+    delay(5);
+    current3 = digitalRead(BUTTON3);
+  }
+  return current3;
+}
+boolean debounce4(boolean last4) {
+  boolean current4 = digitalRead(BUTTON4);
+  if(last4 != current4) {
+    delay(5);
+    current4 = digitalRead(BUTTON4);
+  }
+  return current4;
+}
+boolean debounce5(boolean last5) {
+  boolean current5 = digitalRead(BUTTON5);
+  if(last5 != current5) {
+    delay(5);
+    current5 = digitalRead(BUTTON5);
+  }
+  return current5;
+}
+
+
+void loop()
+{
+  relayButton1();
+  relayButton2();
+  relayButton3();
+  relayButton4();
+  ledOn();
+  buttonReset();
+}
+
+
+void relayButton1() {
+  unsigned long currentMillis = millis();
+  
+  currentButton1 = debounce1(lastButton1);
+  if(lastButton1 == LOW && currentButton1 == HIGH) {
+    relayOn1 = !relayOn1;
+  }
+  lastButton1 = currentButton1;
+  digitalWrite(RELAY1, relayOn1);
+
+  if (currentMillis - previousMillis >= interval) {
+    if (relayOn1 == false) {
+      relayOn1 = true;
+    }
+    previousMillis = currentMillis;
+  }
+}
+
+void relayButton2() {
+  currentButton2 = debounce2(lastButton2);
+  if(lastButton2 == LOW && currentButton2 == HIGH) {
+    relayOn2 = !relayOn2;
+  }
+  lastButton2 = currentButton2;
+  digitalWrite(RELAY2, relayOn2);
+}
+
+void relayButton3() {
+  currentButton3 = debounce3(lastButton3);
+  if(lastButton3 == LOW && currentButton3 == HIGH) {
+    relayOn3 = !relayOn3;
+  }
+  lastButton3 = currentButton3;
+  digitalWrite(RELAY3, relayOn3);
+}
+
+void relayButton4() {
+  currentButton4 = debounce4(lastButton4);
+  if(lastButton4 == LOW && currentButton4 == HIGH) {
+    relayOn4 = !relayOn4;
+  }
+  lastButton4 = currentButton4;
+  digitalWrite(RELAY4, relayOn4);
+}
+
+void ledOn() {
+  unsigned long currentMillis = millis();
+
+  if (relayOn1 == true) {
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, HIGH);
+    previousMillis = currentMillis;
+  }
+
+  if (currentMillis - previousMillis <= intervalReset && relayOn1 == false) {
+  //if (currentMillis - previousMillis <= (interval/2) && relayOn1 == false) {
+    digitalWrite(LED1, HIGH);
+    digitalWrite(LED2, LOW);
+    digitalWrite(LED3, LOW);
+  }
+  if (currentMillis - previousMillis >= intervalReset && relayOn1 == false) {
+  //if (currentMillis - previousMillis >= (interval/2) && relayOn1 == false) {
+    digitalWrite(LED1, LOW);
+    digitalWrite(LED2, HIGH);
+    digitalWrite(LED3, LOW);
+  }
+}
+
+void buttonReset() {
+  unsigned long currentMillis = millis();
+  
+  currentButton5 = debounce5(lastButton5);
+  if(lastButton5 == LOW && currentButton5 == HIGH && relayOn1 == false) {
+    previousMillis = currentMillis;
+  }
+}
+
